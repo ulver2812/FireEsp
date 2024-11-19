@@ -1,0 +1,14 @@
+FbServer      KEYWORD1
+FbAuthentication   KEYWORD1
+FbDatabase    KEYWORD1
+initialize    KEYWORD2
+signUp        KEYWORD2
+signIn        KEYWORD2
+resetPassword KEYWORD2
+verifyEmail   KEYWORD2
+checkEmailVerified KEYWORD2
+deleteUser    KEYWORD2
+put           KEYWORD2
+update        KEYWORD2
+get           KEYWORD2
+remove        KEYWORD2
