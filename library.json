@@ -1,0 +1,20 @@
+{
+  "name": "FireESP",
+  "version": "v1.0.0",
+  "author": "Init.io",
+  "maintainer": "Siam Rayhan <developers.init.io@gmail.com>",
+  "sentence": "A library for connecting to Firebase using ESP boards",
+  "paragraph": "This library provides functionality for Firebase Authentication, Realtime Database, and Firestore operations using ESP8266/ESP32 boards. It includes methods for user authentication (sign up, sign in, reset password), database operations (put, update, get, remove), and more.",
+  "category": "Communication",
+  "url": "https://github.com/Init-io/FireESP",
+  "architectures": ["esp8266", "esp32"],
+  "includes": ["FireESP.h"],
+  "platforms": {
+    "esp8266": {
+      "version": "2.7.4"
+    },
+    "esp32": {
+      "version": "1.0.6"
+    }
+  }
+}
