@@ -1,5 +1,5 @@
 #include <ESP8266WiFi.h>
-#include <FireESP.h>  // Include the FireESP library
+#include <FireEsp.h>  // Include the FireESP library
 
 // Wi-Fi credentials
 const char* ssid = "your_SSID";
@@ -61,6 +61,13 @@ void setup() {
     Serial.println("Email verification sent!");
   } else {
     Serial.println("Email verification failed!");
+  }
+
+  // Example of Email Verification Check
+  if (auth.checkEmailVerified(auth.getIdToken())) {
+    Serial.println("Email verified!");
+  } else {
+    Serial.println("Email not verified!");
   }
 }
 
