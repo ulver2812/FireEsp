@@ -156,14 +156,3 @@ Contributions are welcome! Please fork the repository, create a new branch, and 
 ## Contact
 
 For any issues or suggestions, please open an issue on the GitHub repository, or contact me directly at [developers.init.io@gmail.com].
-
-```
-
-### Key Sections Explained:
-
-- **Project Description**: A brief explanation of what the library does and its features.
-- **Installation**: Instructions on how to install the library into the Arduino IDE.
-- **Usage**: Example code demonstrating how to use the library for Firebase authentication and database operations.
-- **Example**: A simple Arduino sketch that demonstrates the usage of the library.
-- **License**: Specifies that the library is open-source and licensed under the MIT License.
-- **Contributing**: Guidelines for others who might want to contribute to your project.
