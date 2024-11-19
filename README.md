@@ -1,6 +1,6 @@
-# FireESP - A C++ Firebase Library for Arduino
+# FireEsp - A C++ Firebase Library for Arduino
 
-FireESP is a lightweight C++ library that simplifies the integration of Firebase services into your Arduino projects. It provides classes to interact with Firebase Authentication, Realtime Database, and Server Configuration. This library is designed for ease of use and aims to make Firebase integration seamless for IoT and embedded projects using Arduino-compatible boards.
+FireEsp is a lightweight C++ library that simplifies the integration of Firebase services into your Arduino projects. It provides classes to interact with Firebase Authentication, Realtime Database, and Server Configuration. This library is designed for ease of use and aims to make Firebase integration seamless for IoT and embedded projects using Arduino-compatible boards.
 
 ## Features
 
@@ -21,7 +21,7 @@ FireESP is a lightweight C++ library that simplifies the integration of Firebase
 You can download or clone the FireESP library to your local machine:
 
 ```bash
-git clone https://github.com/Init-io/FireESP.git
+git clone https://github.com/Init-io/FireEsp.git
 ```
 
 ### Step 2: Add the Library to Arduino IDE
@@ -34,7 +34,7 @@ git clone https://github.com/Init-io/FireESP.git
 In your Arduino sketch, include the necessary headers:
 
 ```cpp
-#include <FireESP.h>
+#include <FireEsp.h>
 ```
 
 ## Usage
@@ -108,7 +108,7 @@ bool success = database.remove("/path/to/data", auth.getIdToken());
 Here's an example Arduino sketch that demonstrates how to use the FireESP library:
 
 ```cpp
-#include <FireESP.h>
+#include <FireEsp.h>
 
 FbServer server("YOUR_API_KEY", "YOUR_AUTH_DOMAIN", "YOUR_DATABASE_URL");
 FbAuthentication auth(server);
