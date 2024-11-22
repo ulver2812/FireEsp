@@ -39,26 +39,21 @@ bool FbDatabase::update(String path, String key, int value, String idToken) {
 String FbDatabase::get(String path, String idToken) {
     String url = server.getDatabaseURL() + (path.startsWith("/") ? path : "/" + path) + ".json" +
                  (idToken.length() > 0 ? "?auth=" + idToken : "");
-    String rawResponse = httpRequest("GET", url, "");
+    String payload = httpRequest("GET", url, "");
 
-    Serial.println("GET Response: " + rawResponse);
+    Serial.println("GET Response: " + payload);
 
-    // Check if response contains an error
-    if (rawResponse.indexOf("error") != -1) {
-        return rawResponse; // Return error message
+    // Check if the response contains an error
+    if (payload.indexOf("error") != -1) {
+        return payload; // Return the error message as is
     }
 
-    // Find the start of the payload
-    int payloadStart = rawResponse.indexOf("\r\n\r\n");
-    if (payloadStart == -1) {
-        return "{\"error\": \"Malformed response from server\"}";
-    }
-
-    // Extract and clean payload
-    String payload = rawResponse.substring(payloadStart + 4); // Extract payload
-    payload.trim(); // Clean payload
-    return payload; // Return only the value
+    payload.trim(); // Ensure no leading/trailing whitespace
+    return payload; // Return the cleaned payload
 }
+
+
+
 
 
 // Remove data from the database
@@ -99,31 +94,31 @@ String FbDatabase::httpRequest(String method, String url, String payload) {
     // Send the request
     client.print(request);
 
-    // Wait for a response
-    while (!client.available()) {
-        delay(10);
-    }
+    // Read and parse the response
+    String payloadStartDelimiter = "\r\n\r\n"; // Delimiter to find payload start
+    String response = "";
+    bool isHeader = true; // Track whether we're reading the headers
+    int payloadStartIndex = -1;
 
-    // Read the status line (e.g., "HTTP/1.1 200 OK")
-    String statusLine = client.readStringUntil('\n');
-    Serial.println("HTTP Status Line: " + statusLine);
+    while (client.connected()) {
+        while (client.available()) {
+            char c = client.read();
+            response += c;
 
-    // Extract the HTTP status code
-    int httpCode = statusLine.substring(9, 12).toInt();
-    if (httpCode >= 400) {
-        String errorMsg = "HTTP Error: " + String(httpCode);
-        String responseBody = client.readString();
-        if (responseBody.length() > 0) {
-            errorMsg += "\nResponse Body: " + responseBody;
+            // Find the end of the headers
+            if (isHeader && response.endsWith(payloadStartDelimiter)) {
+                isHeader = false; // We've reached the payload
+                payloadStartIndex = response.length();
+            }
         }
-        client.stop();
-        return "{\"error\": \"" + errorMsg + "\"}";
     }
 
-    // Read the rest of the response
-    String response = client.readString();
     client.stop();
 
-    // Return the response
-    return response;
+    // Return only the payload if headers were found
+    if (payloadStartIndex != -1) {
+        return response.substring(payloadStartIndex); // Extract payload
+    }
+
+    return "{\"error\": \"Malformed response or no payload found\"}";
 }
