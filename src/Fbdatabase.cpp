@@ -36,15 +36,30 @@ bool FbDatabase::update(String path, String key, int value, String idToken) {
     return put(path, key, value, idToken);
 }
 
-// Get data from the database
 String FbDatabase::get(String path, String idToken) {
     String url = server.getDatabaseURL() + (path.startsWith("/") ? path : "/" + path) + ".json" +
                  (idToken.length() > 0 ? "?auth=" + idToken : "");
-    String response = httpRequest("GET", url, "");
+    String rawResponse = httpRequest("GET", url, "");
 
-    Serial.println("GET Response: " + response);
-    return response;
+    Serial.println("GET Response: " + rawResponse);
+
+    // Check if response contains an error
+    if (rawResponse.indexOf("error") != -1) {
+        return rawResponse; // Return error message
+    }
+
+    // Find the start of the payload
+    int payloadStart = rawResponse.indexOf("\r\n\r\n");
+    if (payloadStart == -1) {
+        return "{\"error\": \"Malformed response from server\"}";
+    }
+
+    // Extract and clean payload
+    String payload = rawResponse.substring(payloadStart + 4); // Extract payload
+    payload.trim(); // Clean payload
+    return payload; // Return only the value
 }
+
 
 // Remove data from the database
 bool FbDatabase::remove(String path, String idToken) {
