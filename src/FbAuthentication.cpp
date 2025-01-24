@@ -28,41 +28,27 @@ String FbAuthentication::httpRequest(String method, String url, String payload) 
     // Send HTTP request
     client.print(request);
 
-    // Wait for response
+    // Wait for response with timeout (1 second delay is too rigid)
+    unsigned long startMillis = millis();
+    unsigned long timeout = 10000;  // Timeout set to 10 seconds (adjustable)
+
     while (client.connected() && !client.available()) {
-        delay(10);
-    }
-
-    // Read headers and skip them
-    while (client.available()) {
-        String line = client.readStringUntil('\n');
-        if (line == "\r") {  // Empty line signals end of headers
-            break;
+        if (millis() - startMillis > timeout) {
+            // Timeout occurred, break out of the loop
+            return "{\"error\": \"Timeout waiting for response\"}";
         }
+        delay(10);  // Slight delay to avoid overloading the CPU
     }
 
-    // Read chunked response body
+    // Read the response body
     String responseBody = "";
     while (client.available()) {
-        // Read the chunk size in hexadecimal
-        String chunkSizeHex = client.readStringUntil('\n');
-        int chunkSize = strtol(chunkSizeHex.c_str(), NULL, 16);  // Convert hex to integer
-        if (chunkSize == 0) {  // End of chunks
-            break;
-        }
-
-        // Allocate memory for the chunk data
-        char* chunk = new char[chunkSize + 1];  // +1 for null terminator
-        client.readBytes(chunk, chunkSize);
-        chunk[chunkSize] = '\0';  // Null-terminate the string
-        responseBody += chunk;   // Concatenate the chunk to the response body
-        delete[] chunk;          // Free the allocated memory
-
-        // Skip the trailing \r\n after each chunk
-        client.readStringUntil('\n');
+        String line = client.readStringUntil('\n');
+        responseBody += line;
     }
 
-    return responseBody;  // Return the full JSON body
+    // Return the full response
+    return responseBody;
 }
 
 // Helper method to extract tokens from the response
