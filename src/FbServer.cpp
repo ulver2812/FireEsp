@@ -2,15 +2,15 @@
 #include <Arduino.h>  // Include Arduino library for Serial
 
 // Constructor definition
-FbServer::FbServer(String apiKey, String authDomain, String databaseURL)
+FbServer::FbServer(const String& apiKey, const String& authDomain, const String& databaseURL)
     : _apiKey(apiKey), _authDomain(authDomain), _databaseURL(databaseURL) {}
 
 // Initialize method definition
 void FbServer::initialize() {
-    Serial.println("Initializing Firebase server...");
-    Serial.println("API Key: " + _apiKey);
-    Serial.println("Auth Domain: " + _authDomain);
-    Serial.println("Database URL: " + _databaseURL);
+    debugPrint("Initializing Firebase server...");
+    debugPrint("API Key: " + _apiKey);
+    debugPrint("Auth Domain: " + _authDomain);
+    debugPrint("Database URL: " + _databaseURL);
 }
 
 // Getter method for API Key
@@ -26,4 +26,11 @@ String FbServer::getAuthDomain() const {
 // Getter method for Database URL
 String FbServer::getDatabaseURL() const {
     return _databaseURL;
+}
+
+// Debug helper method
+void FbServer::debugPrint(const String& message) const {
+#if DEBUG // Only include this code if DEBUG is enabled
+    Serial.println(message);
+#endif
 }
