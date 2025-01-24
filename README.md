@@ -1,3 +1,5 @@
+---
+
 # FireEsp - A C++ Firebase Library for Arduino
 
 FireEsp is a lightweight C++ library that simplifies the integration of Firebase services into your Arduino projects. It provides classes to interact with Firebase Authentication, Realtime Database, and Server Configuration. This library is designed for ease of use and aims to make Firebase integration seamless for IoT and embedded projects using Arduino-compatible boards.
@@ -8,6 +10,7 @@ FireEsp is a lightweight C++ library that simplifies the integration of Firebase
 - **Firebase Realtime Database**: Perform basic CRUD operations (create, read, update, delete) on Firebase's Realtime Database.
 - **Server Configuration**: Set and manage Firebase project details such as API key, auth domain, and database URL.
 - **HTTP Requests**: Send HTTP requests to Firebase's REST API to perform authentication and database operations.
+- **Debugging Support**: Easily switch between production and debugging modes with a configurable debug level, ensuring secure and efficient logging.
 
 ## Requirements
 
@@ -103,6 +106,51 @@ String value = database.get("/path/to/data", auth.getIdToken());
 bool success = database.remove("/path/to/data", auth.getIdToken());
 ```
 
+### Debugging Support
+
+The library now supports flexible debugging configurations. By defining the `DEBUG` constant, you can easily switch between debugging and production modes, ensuring sensitive data is not printed in production.
+
+#### Set Debug Level:
+To enable debugging for Firebase server interactions, simply define the `DEBUG` constant before including the library:
+
+```cpp
+#define DEBUG 1  // Set to 0 for production, 1 for debug
+#include <FireEsp.h>
+```
+
+- **Level 0 (Production)**: No debugging output will be printed to the Serial Monitor.
+- **Level 1 (Debugging)**: Prints detailed information about HTTP requests, responses, and errors for easier troubleshooting.
+
+#### Example with Debugging:
+
+```cpp
+#define DEBUG 1
+#include <FireEsp.h>
+
+FbServer server("YOUR_API_KEY", "YOUR_AUTH_DOMAIN", "YOUR_DATABASE_URL");
+FbAuthentication auth(server);
+
+void setup() {
+  Serial.begin(115200);
+
+  server.initialize();
+  
+  if (auth.signUp("user@example.com", "password123")) {
+    Serial.println("User signed up!");
+  }
+  
+  if (auth.signIn("user@example.com", "password123")) {
+    Serial.println("User signed in!");
+  }
+}
+
+void loop() {
+  // Your code here
+}
+```
+
+In debugging mode, you'll see detailed logs that include request headers, responses, and any errors encountered during sign-in, sign-up, or other operations.
+
 ## Example
 
 Here's an example Arduino sketch that demonstrates how to use the FireESP library:
@@ -116,7 +164,7 @@ FbDatabase database(server);
 
 void setup() {
   Serial.begin(115200);
-  
+
   server.initialize();
   
   if (auth.signUp("user@example.com", "password123")) {
@@ -134,6 +182,11 @@ void loop() {
   // Your code here
 }
 ```
+
+## Known Issues
+
+- **Delayed Responses**: Some users have reported that authentication requests may fail initially but work after retrying. This is due to delays in receiving responses from Firebase. A workaround is to introduce a delay between retries or adjust the HTTP client connection timeout.
+- **WiFi Stability**: Ensure stable WiFi connectivity, as network issues can affect communication with Firebase services.
 
 ## License
 
@@ -156,3 +209,5 @@ Contributions are welcome! Please fork the repository, create a new branch, and 
 ## Contact
 
 For any issues or suggestions, please open an issue on the GitHub repository, or contact me directly at [developers.init.io@gmail.com].
+
+---
