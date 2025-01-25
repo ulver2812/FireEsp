@@ -28,27 +28,41 @@ String FbAuthentication::httpRequest(String method, String url, String payload) 
     // Send HTTP request
     client.print(request);
 
-    // Wait for response with timeout (1 second delay is too rigid)
-    unsigned long startMillis = millis();
-    unsigned long timeout = 10000;  // Timeout set to 10 seconds (adjustable)
-
+    // Wait for response
     while (client.connected() && !client.available()) {
-        if (millis() - startMillis > timeout) {
-            // Timeout occurred, break out of the loop
-            return "{\"error\": \"Timeout waiting for response\"}";
-        }
-        delay(10);  // Slight delay to avoid overloading the CPU
+        delay(10);
     }
 
-    // Read the response body
-    String responseBody = "";
+    // Read headers and skip them
     while (client.available()) {
         String line = client.readStringUntil('\n');
-        responseBody += line;
+        if (line == "\r") {  // Empty line signals end of headers
+            break;
+        }
     }
 
-    // Return the full response
-    return responseBody;
+    // Read chunked response body
+    String responseBody = "";
+    while (client.available()) {
+        // Read the chunk size in hexadecimal
+        String chunkSizeHex = client.readStringUntil('\n');
+        int chunkSize = strtol(chunkSizeHex.c_str(), NULL, 16);  // Convert hex to integer
+        if (chunkSize == 0) {  // End of chunks
+            break;
+        }
+
+        // Allocate memory for the chunk data
+        char* chunk = new char[chunkSize + 1];  // +1 for null terminator
+        client.readBytes(chunk, chunkSize);
+        chunk[chunkSize] = '\0';  // Null-terminate the string
+        responseBody += chunk;   // Concatenate the chunk to the response body
+        delete[] chunk;          // Free the allocated memory
+
+        // Skip the trailing \r\n after each chunk
+        client.readStringUntil('\n');
+    }
+
+    return responseBody;  // Return the full JSON body
 }
 
 // Helper method to extract tokens from the response
@@ -118,30 +132,34 @@ bool FbAuthentication::signIn(String email, String password) {
     String payload = "{\"email\":\"" + email + "\",\"password\":\"" + password + "\",\"returnSecureToken\":true}";
     String response = httpRequest("POST", url, payload);
 
+    Serial.println("Raw Response: " + response);
+
     // Parse the JSON response
     StaticJsonDocument<1024> jsonDoc;
     DeserializationError error = deserializeJson(jsonDoc, response);
 
-    // Handle parsing errors
     if (error) {
         Serial.println("Error parsing signIn response: " + String(error.c_str()));
         return false;
     }
 
-    // Extract idToken and localId from the response
-    String idToken = jsonDoc["idToken"] | "";  // Default to empty string if not found
-    String localId = jsonDoc["localId"] | "";  // Default to empty string if not found
-
-    // Check if the idToken and localId are valid (indicating a successful sign-in)
-    if (idToken != "" && localId != "") {
+    if (jsonDoc.containsKey("idToken") && jsonDoc.containsKey("localId")) {
+        String idToken = jsonDoc["idToken"].as<String>();
+        String localId = jsonDoc["localId"].as<String>();
+        Serial.println("idToken: " + idToken);
+        Serial.println("localId: " + localId);
         this->idToken = idToken;
         this->localId = localId;
         return true;
     } else {
-        Serial.println("Error: Missing idToken or localId in signIn response");
+        Serial.println("Error: Missing idToken or localId in response");
+        if (jsonDoc.containsKey("error")) {
+            Serial.println("Error message: " + String(jsonDoc["error"]["message"].as<String>()));
+        }
         return false;
     }
 }
+
 
 // Method to retrieve the idToken
 String FbAuthentication::getIdToken() {
