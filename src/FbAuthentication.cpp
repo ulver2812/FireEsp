@@ -28,6 +28,8 @@ String FbAuthentication::httpRequest(String method, String url, String payload) 
     // Send HTTP request
     client.print(request);
 
+    delay(1000);
+
     // Wait for response
     while (client.connected() && !client.available()) {
         delay(10);
