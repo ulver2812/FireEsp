@@ -1,8 +1,22 @@
 #include "FbDatabase.h"
 #include <WiFiClientSecure.h>
+#include <ArduinoJson.h>
 
 // Constructor
 FbDatabase::FbDatabase(FbServer& serverRef) : server(serverRef) {}
+
+// Put (JSON value)
+bool FbDatabase::put(String path, String key, JsonDocument jsonDoc, String idToken) {
+    String value = "";
+    serializeJson(jsonDoc, value);
+    String url = server.getDatabaseURL() + (path.startsWith("/") ? path : "/" + path) + ".json" +
+                 (idToken.length() > 0 ? "?auth=" + idToken : "");
+    String payload = "{\"" + key + "\":" + value + "}";
+    String response = httpRequest("PATCH", url, payload);
+
+    Serial.println("PUT Response (String): " + response);
+    return response.indexOf("error") == -1;
+}
 
 // Put (String value)
 bool FbDatabase::put(String path, String key, String value, String idToken) {
@@ -33,6 +47,11 @@ bool FbDatabase::update(String path, String key, String value, String idToken) {
 
 // Update (int value) - Alias for put
 bool FbDatabase::update(String path, String key, int value, String idToken) {
+    return put(path, key, value, idToken);
+}
+
+// Update (json value) - Alias for put
+bool FbDatabase::update(String path, String key, JsonDocument value, String idToken) {
     return put(path, key, value, idToken);
 }
 
